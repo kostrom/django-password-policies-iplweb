@@ -27,7 +27,7 @@ in a project's settings file::
     try:
         # Did this ever worked? It gives error on Django 2.0
         # and I haven't ran the test suite before that...
-        auth = request.user.is_authenticated()
+        auth = request.user and request.user.is_authenticated()
     except TypeError:
         auth = request.user.is_authenticated
     if auth:
