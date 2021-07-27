@@ -1,6 +1,20 @@
 from password_policies.models import PasswordHistory
 
 
+def _authenticated(request):
+    """ helper function to check request for an authenticated user """
+
+    if not hasattr(request, 'user'):
+        return False
+    if not request.user:
+        return False
+    try:
+        # Django 1.9 backwards compatibility
+        return request.user.is_authenticated()
+    except TypeError:
+        return request.user.is_authenticated
+
+
 def password_status(request):
     """
 Adds a variable determining the state of a user's password
@@ -24,13 +38,7 @@ in a project's settings file::
     )
 """
     d = {}
-    try:
-        # Did this ever worked? It gives error on Django 2.0
-        # and I haven't ran the test suite before that...
-        auth = request.user.is_authenticated()
-    except TypeError:
-        auth = request.user.is_authenticated
-    if auth:
+    if _authenticated(request):
         if '_password_policies_change_required' not in request.session:
             r = PasswordHistory.objects.change_required(request.user)
         else:
